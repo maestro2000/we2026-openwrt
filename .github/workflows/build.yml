@@ -35,7 +35,7 @@ jobs:
         working-directory: imagebuilder
         run: |
           make image \
-            PROFILE="zbtlink_zbt-wr8305rt" \
+            PROFILE="zbtlink_zbt-we2026" \
             PACKAGES="block-mount kmod-usb-storage kmod-fs-ext4 e2fsprogs"
 
       - name: Prepare artifact
