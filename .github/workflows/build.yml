@@ -1,4 +1,4 @@
-name: Build OpenWrt ZBT-WR8305RT
+name: Build OpenWrt ZBT-WE2026 with USB and Extroot
 
 on:
   workflow_dispatch:
@@ -26,17 +26,21 @@ jobs:
           tar --zstd -xf imagebuilder.tar.zst
           mv openwrt-imagebuilder-* imagebuilder
 
-      - name: Show ZBT-WR8305RT profile
+      - name: Show ZBT-WE2026 profile
         working-directory: imagebuilder
         run: |
-          make info | grep -i -E 'WR8305RT|WE2026' || true
+          make info | grep -i -A5 'zbt-we2026' || true
 
-      - name: Build firmware with Extroot support
+      - name: Build firmware with USB and Extroot
         working-directory: imagebuilder
         run: |
           make image \
             PROFILE="zbtlink_zbt-we2026" \
-            PACKAGES="block-mount kmod-usb-storage kmod-fs-ext4 e2fsprogs"
+            PACKAGES="kmod-usb2 kmod-usb-storage kmod-scsi-core block-mount kmod-fs-ext4 e2fsprogs"
+
+      - name: Check built files
+        run: |
+          find imagebuilder/bin/targets -type f -name '*.bin' -exec ls -lh {} \;
 
       - name: Prepare artifact
         run: |
@@ -48,5 +52,5 @@ jobs:
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: openwrt-zbt-wr8305rt-image
+          name: openwrt-zbt-we2026-usb-extroot
           path: artifact/
