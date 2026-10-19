@@ -30,9 +30,10 @@ jobs:
       - name: Collect artifacts
         run: |
           cd ib
-          mkdir -p output
-          find bin/targets -name '*sysupgrade*' -exec cp {} output/ \;
-          find bin/targets -name '*factory*' -exec cp {} output/ \;
+          mkdir -p $GITHUB_WORKSPACE/output
+          find bin/targets -name '*sysupgrade*' -exec cp {} $GITHUB_WORKSPACE/output/ \;
+          find bin/targets -name '*factory*' -exec cp {} $GITHUB_WORKSPACE/output/ \;
+          ls -la $GITHUB_WORKSPACE/output
 
       - name: Upload firmware
         uses: actions/upload-artifact@v4
