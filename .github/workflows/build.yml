@@ -1,4 +1,4 @@
-name: Build ZBT WE1626 with Extroot
+name: Build ZBT images with Extroot
 
 on:
   workflow_dispatch:
@@ -10,17 +10,22 @@ jobs:
     steps:
       - name: Download Image Builder
         run: |
-          URL1="https://openwrt.132lan.ru/releases/25.12.5/targets/ramips/mt7620/openwrt-imagebuilder-25.12.5-ramips-mt7620.Linux-x86_64.tar.xz"
-          URL2="https://openwrt.132lan.ru/releases/25.12.5/ramips/mt7620/openwrt-imagebuilder-25.12.5-ramips-mt7620.Linux-x86_64.tar.xz"
-          wget -O ib.tar.xz "$URL1" || wget -O ib.tar.xz "$URL2"
-          tar -xf ib.tar.xz
+          wget -O ib.tar.zst "https://openwrt.132lan.ru/releases/25.12.5/ramips/mt7620/openwrt-imagebuilder-25.12.5-ramips-mt7620.Linux-x86_64.tar.zst"
+          tar --zstd -xf ib.tar.zst
           mv openwrt-imagebuilder-* ib
 
-      - name: Build image with Extroot
+      - name: Show available profiles
         run: |
           cd ib
-          make image PROFILE=zbt-we1626 \
-            PACKAGES="kmod-usb-storage kmod-usb-storage-uas kmod-fs-ext4 kmod-fs-f2fs f2fs-tools kmod-nls-cp437 kmod-nls-iso8859-1 block-mount fdisk losetup kmod-loop"
+          make info | grep -i "zbt\|kroks" || true
+
+      - name: Build ZBT images with Extroot
+        run: |
+          cd ib
+          for PROFILE in zbtlink_zbt-we826-16m zbtlink_zbt-we826-32m zbtlink_zbt-we826-e zbtlink_zbt-wr8305rt; do
+            make image PROFILE=$PROFILE \
+              PACKAGES="kmod-usb-storage kmod-usb-storage-uas kmod-fs-ext4 kmod-fs-f2fs f2fs-tools kmod-nls-cp437 kmod-nls-iso8859-1 block-mount fdisk losetup kmod-loop"
+          done
 
       - name: Collect artifacts
         run: |
@@ -32,5 +37,5 @@ jobs:
       - name: Upload firmware
         uses: actions/upload-artifact@v4
         with:
-          name: zbt-we1626-extroot
+          name: zbt-extroot-images
           path: output/
